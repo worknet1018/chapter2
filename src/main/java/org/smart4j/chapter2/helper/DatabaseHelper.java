@@ -16,6 +16,8 @@ public final class DatabaseHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHelper.class);
 
     private static final QueryRunner QUERY_RUNNER = new QueryRunner();
+    private static final ThreadLocal<Connection> CONNECTION_HOLDER =new ThreadLocal<Connection>();
+
 
     private static final String DRIVER;
     private static final String URL;
@@ -40,25 +42,33 @@ public final class DatabaseHelper {
      * @return
      */
     public static Connection getConnection() {
-        Connection conn = null;
-        try {
-            conn= DriverManager.getConnection(URL,USERNAME,PASSWORD);
-        } catch (SQLException e) {
-            LOGGER.error("get connection failure",e);
+        Connection conn = CONNECTION_HOLDER.get();
+
+        if (conn ==null) {
+            try {
+                conn= DriverManager.getConnection(URL,USERNAME,PASSWORD);
+            } catch (SQLException e) {
+                LOGGER.error("get connection failure",e);
+            }finally {
+                CONNECTION_HOLDER.set(conn);
+            }
         }
         return conn;
     }
 
     /**
      * 关闭数据库连接
-     * @param conn
+     *
      */
-    public static void closeConnection(Connection conn) {
+    public static void closeConnection() {
+        Connection conn = CONNECTION_HOLDER.get();
         if (conn != null) {
             try {
                 conn.close();
             } catch (SQLException e) {
                 LOGGER.error("close connection failure",e);
+            }finally {
+                CONNECTION_HOLDER.remove();
             }
         }
     }
@@ -80,7 +90,7 @@ public final class DatabaseHelper {
             LOGGER.error("query entity list failure",e);
             throw new RuntimeException(e);
         } finally {
-            closeConnection(conn);
+            closeConnection();
         }
 
         return entityList;

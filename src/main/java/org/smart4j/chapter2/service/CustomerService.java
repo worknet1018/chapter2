@@ -25,16 +25,8 @@ public class CustomerService {
      * @return
      */
     public List<Customer> getCustomerList(){
-        Connection conn = DatabaseHelper.getConnection();
-
-        try {
             String sql="SELECT * FROM customer";
             return DatabaseHelper.queryEntityList(Customer.class,sql);
-
-        } finally {
-            DatabaseHelper.closeConnection(conn);
-        }
-
     }
 
     /**

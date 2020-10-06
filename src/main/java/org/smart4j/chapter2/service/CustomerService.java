@@ -25,31 +25,16 @@ public class CustomerService {
      * @return
      */
     public List<Customer> getCustomerList(){
-        Connection conn = null;
+        Connection conn = DatabaseHelper.getConnection();
 
-            List<Customer> customerList = new ArrayList<Customer>();
         try {
             String sql="SELECT * FROM customer";
-            conn = DatabaseHelper.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs=stmt.executeQuery();
-            while (rs.next()){
-                Customer customer = new Customer();
-                customer.setId(rs.getLong("id"));
-                customer.setName(rs.getString("name"));
-                customer.setContact(rs.getString("contact"));
-                customer.setTelephone(rs.getString("telephone"));
-                customer.setEmail(rs.getString("email"));
-                customer.setRemark(rs.getString("remark"));
-                customerList.add(customer);
-            }
+            return DatabaseHelper.queryEntityList(Customer.class,sql);
 
-        } catch (SQLException e) {
-            LOGGER.error("execute sql failure",e);
         } finally {
             DatabaseHelper.closeConnection(conn);
         }
-        return  customerList;
+
     }
 
     /**

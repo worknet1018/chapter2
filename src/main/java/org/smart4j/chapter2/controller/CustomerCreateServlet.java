@@ -7,6 +7,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * 进入 创建客户 界面
+ */
 @WebServlet("/customer_create")
 public class CustomerCreateServlet extends HttpServlet {
     /**

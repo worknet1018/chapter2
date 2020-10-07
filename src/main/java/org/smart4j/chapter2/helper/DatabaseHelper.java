@@ -11,6 +11,10 @@ import org.smart4j.chapter2.model.Customer;
 import org.smart4j.chapter2.util.CollectionUtil;
 import org.smart4j.chapter2.util.PropsUtil;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -48,6 +52,25 @@ public final class DatabaseHelper {
         DATA_SOURCE.setUsername(username);
         DATA_SOURCE.setPassword(password);
 
+    }
+
+    /**
+     * 执行SQL文件
+     * @param filePath
+     */
+    public static void executeSqlFile(String filePath){
+        String file = "sql/customer_init.sql";
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(file);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        try {
+            String sql;
+            while ((sql = reader.readLine()) != null) {
+                DatabaseHelper.executeUpdate(sql);
+            }
+        } catch (IOException e) {
+            LOGGER.error("execute sql file failure",e);
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -247,6 +270,6 @@ public final class DatabaseHelper {
 
     }
     private static <T> String getTableName(Class<T> entityClass) {
-        return entityClass.getSimpleName();
+        return entityClass.getSimpleName().toLowerCase();
     }
 }

@@ -1,5 +1,6 @@
 package org.smart4j.chapter2.helper;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -27,24 +28,26 @@ public final class DatabaseHelper {
     private static final QueryRunner QUERY_RUNNER = new QueryRunner();
     private static final ThreadLocal<Connection> CONNECTION_HOLDER =new ThreadLocal<Connection>();
 
+    private static final BasicDataSource DATA_SOURCE;
 
 
-    private static final String DRIVER;
-    private static final String URL;
-    private static final String USERNAME;
-    private static final String PASSWORD;
+
+
 
     static {
         Properties conf= PropsUtil.loadProps("config.properties");
-        DRIVER= conf.getProperty("jdbc.driver");
-        URL=conf.getProperty("jdbc.url");
-        USERNAME=conf.getProperty("jdbc.username");
-        PASSWORD= conf.getProperty("jdbc.password");
-        try{
-            Class.forName(DRIVER);
-        }catch (ClassNotFoundException e){
-            LOGGER.error("can not load jdbc driver",e);
-        }
+
+        String driver = conf.getProperty("jdbc.driver");
+        String url = conf.getProperty("jdbc.url");
+        String username = conf.getProperty("jdbc.username");
+        String password = conf.getProperty("jdbc.password");
+
+        DATA_SOURCE=new BasicDataSource();
+        DATA_SOURCE.setDriverClassName(driver);
+        DATA_SOURCE.setUrl(url);
+        DATA_SOURCE.setUsername(username);
+        DATA_SOURCE.setPassword(password);
+
     }
 
     /**
@@ -56,7 +59,7 @@ public final class DatabaseHelper {
 
         if (conn ==null) {
             try {
-                conn= DriverManager.getConnection(URL,USERNAME,PASSWORD);
+                conn= DATA_SOURCE.getConnection();
             } catch (SQLException e) {
                 LOGGER.error("get connection failure",e);
             }finally {
